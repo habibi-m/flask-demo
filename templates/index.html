@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech to Text - Demo</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar for history -->
+        <div class="sidebar">
+            <h2>History</h2>
+            <ul id="history-list">
+                {% for transcription in transcriptions %}
+                    <li onclick="showTranscription('{{ transcription['transcription'].replace("'", "\\'").replace('\n', '\\n') }}')">
+                        <em>{{ transcription['filename'] }}<em> [{{ transcription['size'] }}]</em></em>
+                        <span>{{ transcription['request_at'] }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Main content -->
+        <div class="main">
+            <h1>Upload Audio File</h1>
+            <p>Choose an audio file to convert to text:</p>
+            
+            <!-- File upload form -->
+            <form id="upload-form" method="POST" enctype="multipart/form-data">
+                <input type="file" id="audio-file" name="audio" accept="audio/*">
+                <button type="submit" class="btn">Upload</button>
+            </form>
+            
+            <!-- Result section -->
+            <div id="result-section">
+                <h3>Result:</h3>
+                <div id="loading-spinner" style="display: none;">Processing...</div>
+                <pre id="result-text">Your transcribed text will appear here...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent form from submitting traditionally
+            
+            const fileInput = document.getElementById('audio-file');
+            const formData = new FormData();
+            formData.append('audio', fileInput.files[0]);
+            
+            // Show loading spinner
+            document.getElementById('loading-spinner').style.display = 'block';
+            document.getElementById('result-text').textContent = '';
+
+            // Send AJAX request
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading spinner
+                document.getElementById('loading-spinner').style.display = 'none';
+
+                if (data.transcription) {
+                    document.getElementById('result-text').textContent = data.transcription;
+
+                    // Dynamically add new item to the history list with formatted file size
+                    const historyList = document.getElementById('history-list');
+                    const newItem = document.createElement('li');
+                    
+                    // Set the inner HTML of the new item
+                    newItem.innerHTML = `
+                        <em>${data.filename}<em> [${formatFileSize(data.size)}]</em></em>
+                        <span>${data.request_at}</span>
+                    `;
+
+                    // Set onclick event to show transcription
+                    //newItem.setAttribute('onclick', `showTranscription('${data.transcription}')`);
+                    newItem.setAttribute('onclick', `showTranscription('${data.transcription.replace(/'/g, "\\'").replace(/\n/g, '\\n')}')`);
+
+                    // Add the new item to the history list
+                    historyList.appendChild(newItem);
+                } else if (data.error) {
+                    document.getElementById('result-text').textContent = data.error;
+                }
+            })
+            .catch(error => {
+                // Hide loading spinner
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('result-text').textContent = 'Error occurred: ' + error;
+            });
+        });
+
+        function showTranscription(text) {
+            //document.getElementById('result-text').textContent = text;
+            document.getElementById('result-text').innerHTML = text.split('\n').join('<br>');
+        }
+    </script>
+</body>
+</html>

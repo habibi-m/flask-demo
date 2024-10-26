@@ -1,0 +1,158 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f7f7f8;
+}
+
+.container {
+    display: flex;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 1200px;
+    height: 80vh;
+    overflow: hidden;
+}
+
+.sidebar {
+    background-color: #2d3748;
+    color: white;
+    width: 25%;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    margin-bottom: 10px;
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar ul li {
+    padding: 10px;
+    background-color: #4a5568;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.sidebar ul li:hover {
+    background-color: #2b6cb0;
+}
+
+.main {
+    flex-grow: 1;
+    padding: 40px;
+}
+
+.main h1 {
+    margin-bottom: 20px;
+}
+
+form {
+    margin-bottom: 20px;
+}
+
+input[type="file"] {
+    margin-bottom: 10px;
+}
+
+.btn {
+    padding: 10px 20px;
+    background-color: #3182ce;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #2b6cb0;
+}
+
+#result-section {
+    margin-top: 20px;
+}
+
+pre {
+    background-color: #f1f1f1;
+    padding: 20px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+}
+
+
+#loading-spinner {
+    font-size: 18px;
+    color: #3182ce;
+    margin-top: 20px;
+}
+
+#loading-spinner::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #3182ce;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+
+.badge {
+    display: inline-block;
+    padding: .35em .65em;
+    font-size: .75em;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25rem;
+}
+
+.bg-primary {
+    background-color: #0d6efd !important;
+}
+
+ul#history-list li {
+    display: flex; flex-direction: column;
+}
+
+ul#history-list li em {
+    font-weight: 600;
+}
+ul#history-list li em em {
+    font-size: 0.6em;
+}
+
+ul#history-list li span {
+    font-size: 0.7em;
+}
+
+#result-text {
+    max-height: 400px; /* حداکثر ارتفاع */
+    overflow-y: auto;  /* فعال‌سازی اسکرول عمودی */
+    border: 1px solid #ccc; /* اضافه کردن حاشیه برای جدا کردن */
+    padding: 10px; /* فضای داخلی */
+    background-color: #f9f9f9; /* رنگ پس‌زمینه */
+}
