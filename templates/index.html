@@ -36,7 +36,8 @@
                 <button type="submit" class="btn">Upload</button>
             </form>
 
-            <label for="playback-speed">Playback Speed:</label>
+            <button id="playPauseBtn" class="btn">Play / Pause</button>
+            <label for="playback-speed">Ratio:</label>
             <select id="playback-speed" class="speed-select">
                 <option value="0.5">0.5x</option>
                 <option value="1" selected>1x</option>
@@ -44,9 +45,8 @@
                 <option value="2">2x</option>
             </select>
 
-            <div id="waveform"></div>
-            <button id="playPauseBtn" class="btn">Play / Pause</button>
-
+            <div id="waveform" style="padding-top: 10px;"></div>
+            
             <!-- Result section -->
             <div id="result-section">
                 <!-- <h3>Result:</h3> -->
