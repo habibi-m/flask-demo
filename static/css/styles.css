@@ -20,7 +20,7 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 80%;
     max-width: 1200px;
-    height: 80vh;
+    height: 90vh;
     overflow: hidden;
 }
 
@@ -155,4 +155,19 @@ ul#history-list li span {
     border: 1px solid #ccc; /* اضافه کردن حاشیه برای جدا کردن */
     padding: 10px; /* فضای داخلی */
     background-color: #f9f9f9; /* رنگ پس‌زمینه */
+    direction: rtl;
+    font-family: Tahoma, 'Segoe UI';
+}
+
+.speed-select {
+    font-size: 16px;
+    padding: 5px;
+    border-radius: 5px;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.highlighted {
+    font-weight: bold;
+    background-color: #dfdfdf;
 }

@@ -84,8 +84,7 @@ def upload_file():
     file_size = os.path.getsize(file_path)
 
     # Simulate transcription (you will replace this with actual processing)
-    transcription = f"Transcription for {audio_file.filename}:" + '''
-[0.00s -> 3.00s]  سلام و ستون بخير یقین نو هستم بفهمت
+    transcription = '''[0.00s -> 3.00s]  سلام و ستون بخير یقین نو هستم بفهمت
 [3.00s -> 4.48s]  سلام خسته نبایدون
 [4.48s -> 7.10s]  ممنونم در خدمتون هستم جناب بفهمت
 [7.10s -> 9.86s]  در رابطه با نیکسوکارت دعا داشتم
