@@ -159,6 +159,7 @@ ul#history-list li span {
     padding: 10px; /* فضای داخلی */
     background-color: #f9f9f9; /* رنگ پس‌زمینه */
     direction: rtl;
+    position: relative; /* برای موقعیت‌دهی دکمه */
 }
 
 .speed-select {
@@ -172,4 +173,75 @@ ul#history-list li span {
 .highlighted {
     font-weight: bold;
     background-color: #dfdfdf;
+}
+
+.popup {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+}
+
+.popup textarea {
+    padding: 3px;
+}
+
+/* استایل پایه برای دکمه‌های آیکن */
+.icon-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+    /* margin: 5px; */
+}
+
+/* آیکن تایید */
+.confirm-icon::before {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 12px;
+    border: solid #28a745;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    top: 4px;
+    left: 8px;
+}
+
+/* آیکن حذف */
+.delete-icon::before, .delete-icon::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 2px;
+    background-color: #dc3545;
+    top: 11px;
+    left: 4px;
+    transform: rotate(45deg);
+}
+
+.delete-icon::after {
+    transform: rotate(-45deg);
+}
+
+
+.send-btn {
+    background-color: #28a745; /* رنگ سبز */
+    color: white; /* رنگ متن */
+    padding: 5px 10px; /* فضای داخلی */
+    border: none; /* بدون حاشیه */
+    border-radius: 5px; /* گوشه‌های گرد */
+    cursor: pointer; /* تغییر نشانگر ماوس به دکمه */
+    position: sticky; /* موقعیت چسبنده */
+    top: 10px; /* فاصله از بالا */
+    left: 10px; /* فاصله از چپ */
+    z-index: 1000; /* بالاتر از سایر عناصر */
+    margin-bottom: 10px; /* فاصله پایین برای جلوگیری از همپوشانی با متن */
+    float: left;
 }
