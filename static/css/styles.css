@@ -1,8 +1,10 @@
+@import url("fonts/yekan-bakh/stylesheet.css");
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
 }
 
 body {
@@ -91,6 +93,7 @@ pre {
     padding: 20px;
     border-radius: 4px;
     white-space: pre-wrap;
+    font-family: 'Yekan Bakh', 'Segoe UI', Tahoma, Arial, sans-serif;
 }
 
 
@@ -150,13 +153,12 @@ ul#history-list li span {
 }
 
 #result-text {
-    max-height: 220px; /* حداکثر ارتفاع */
+    max-height: 400px; /* حداکثر ارتفاع */
     overflow-y: auto;  /* فعال‌سازی اسکرول عمودی */
     border: 1px solid #ccc; /* اضافه کردن حاشیه برای جدا کردن */
     padding: 10px; /* فضای داخلی */
     background-color: #f9f9f9; /* رنگ پس‌زمینه */
     direction: rtl;
-    font-family: Tahoma, 'Segoe UI';
 }
 
 .speed-select {
