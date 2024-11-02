@@ -52,8 +52,8 @@
                 <!-- <h3>Result:</h3> -->
                 <div id="loading-spinner" style="display: none;">Processing...</div>
                 <pre id="result-text">
-                    <span>...</span>
-                    <div id="send-button" class="send-btn" style="display: none;">Save</div>
+                    <span></span>
+                    <!-- <div id="send-button" class="send-btn" style="display: none;">Save</div> -->
                 </pre>
             </div>
         </div>
@@ -64,6 +64,8 @@
             <button id="confirm-edit" class="icon-btn confirm-icon"></button>
             <button id="delete-word" class="icon-btn delete-icon"></button>
         </div>
+
+        <div id="notifications"></div>
     </div>
 
 
@@ -102,7 +104,8 @@
                     document.getElementById('loading-spinner').style.display = 'none';
 
                     if (data.transcription) {
-                        document.getElementById('result-text').innerHTML = '<div id="send-button" class="send-btn" style="display: none;">ذخیره</div>' + parseApiText(data.transcription);
+                        //document.getElementById('result-text').innerHTML = '<div id="send-button" class="send-btn" style="display: none;">save</div>' + parseApiText(data.transcription);
+                        document.getElementById('result-text').innerHTML = parseApiText(data.transcription);
 
                         // Dynamically add new item to the history list with formatted file size
                         const historyList = document.getElementById('history-list');
@@ -135,7 +138,8 @@
         });
 
         function showTranscription(text) {
-            document.getElementById('result-text').innerHTML = '<div id="send-button" class="send-btn" style="display: none;">ذخیره</div>' + parseApiText(text);
+            //document.getElementById('result-text').innerHTML = '<div id="send-button" class="send-btn" style="display: none;">save</div>' + parseApiText(text);
+            document.getElementById('result-text').innerHTML = parseApiText(text);
         }
 
         function extractTimingData(apiText) {
@@ -255,17 +259,24 @@
 
             // تایید ویرایش متن
             confirmEdit.addEventListener("click", () => {
-                const newText = editText.value.trimEnd() + " ";
+                let newText = editText.value.trimEnd() + " ";
                 if (range) {
                     range.deleteContents();
                     range.insertNode(document.createTextNode(newText));
                     popup.style.display = "none";
                     window.getSelection().removeAllRanges(); // حذف انتخاب
 
-                    // نمایش دکمه ارسال پس از اولین ویرایش
-                    if (!isEdited) {
-                        document.getElementById("send-button").style.display = "block";
-                        isEdited = true; // تنظیم وضعیت ویرایش
+                    // // نمایش دکمه ذخیره پس از اولین ویرایش
+                    // if (!isEdited) {
+                    //     document.getElementById("send-button").style.display = "block";
+
+                    //     isEdited = true; // تنظیم وضعیت ویرایش
+                    // }
+
+                    if (newText.trim() !== selectedText.trim()) {
+                        setTimeout(() => {
+                            showNotification("Saved Successfully!");
+                        }, 2000);
                     }
                 }
             });
@@ -285,10 +296,19 @@
                             popup.style.display = "none";
                             window.getSelection().removeAllRanges(); // حذف انتخاب
 
-                            // نمایش دکمه ارسال پس از اولین ویرایش
-                            if (!isEdited) {
-                                document.getElementById("send-button").style.display = "block";
-                                isEdited = true; // تنظیم وضعیت ویرایش
+                            // نمایش دکمه ذخیره پس از اولین ویرایش
+                            // if (!isEdited) {
+                            //     //document.getElementById("send-button").style.display = "block";
+                            //     setTimeout(() => {
+                            //         showNotification("متن با موفقیت ذخیره شد");
+                            //     }, 3000);
+                            //     isEdited = true; // تنظیم وضعیت ویرایش
+                            // }
+
+                            if (newText.trim() !== selectedText.trim()) {
+                                setTimeout(() => {
+                                    showNotification("Saved Successfully!");
+                                }, 2000);
                             }
                         }
                     }
@@ -303,9 +323,15 @@
                     window.getSelection().removeAllRanges(); // حذف انتخاب
 
                     // نمایش دکمه ارسال پس از اولین ویرایش
-                    if (!isEdited) {
-                        document.getElementById("send-button").style.display = "block";
-                        isEdited = true; // تنظیم وضعیت ویرایش
+                    // if (!isEdited) {
+                    //     document.getElementById("send-button").style.display = "block";
+                    //     isEdited = true; // تنظیم وضعیت ویرایش
+                    // }
+
+                    if (newText.trim() !== selectedText.trim()) {
+                        setTimeout(() => {
+                            showNotification("Saved Successfully!");
+                        }, 2000);
                     }
                 }
             });
@@ -323,6 +349,20 @@
             const editedText = editText.value;
             console.log(editedText);
         });
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.classList.add('notification');
+            notification.textContent = message;
+
+            document.getElementById('notifications').appendChild(notification);
+
+            // حذف پیام پس از 5 ثانیه
+            setTimeout(() => {
+                notification.classList.add('hide');
+                setTimeout(() => notification.remove(), 500); // حذف از DOM پس از محو شدن
+            }, 5000);
+        }
     </script>
 </body>
 

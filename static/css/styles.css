@@ -245,3 +245,27 @@ ul#history-list li span {
     margin-bottom: 10px; /* فاصله پایین برای جلوگیری از همپوشانی با متن */
     float: left;
 }
+
+
+
+#notifications {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+.notification.hide {
+    opacity: 0;
+}
