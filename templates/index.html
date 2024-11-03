@@ -234,9 +234,9 @@
             let selectedText = '';
             let range;
 
-            let isEdited = false; // برای بررسی اینکه آیا ویرایشی انجام شده است
+            let contentHasChanges = false;
+            let autosaveTimer;
 
-            // رویداد mouseup برای نظارت بر انتخاب در resultText
             resultText.addEventListener("mouseup", (event) => {
                 const selection = window.getSelection();
                 if (selection.rangeCount > 0) {
@@ -244,99 +244,78 @@
                     selectedText = selection.toString().trim();
 
                     if (selectedText) {
-                        // موقعیت پاپ‌آپ نسبت به انتخاب
                         const rect = range.getBoundingClientRect();
                         popup.style.display = "block";
                         popup.style.left = `${rect.left + window.scrollX}px`;
                         popup.style.top = `${rect.bottom + window.scrollY}px`;
                         editText.value = selectedText;
 
-                        // فوکوس روی textarea
                         editText.select();
                     }
                 }
             });
 
-            // تایید ویرایش متن
+            // click confirm button
             confirmEdit.addEventListener("click", () => {
                 let newText = editText.value.trimEnd() + " ";
                 if (range) {
                     range.deleteContents();
                     range.insertNode(document.createTextNode(newText));
                     popup.style.display = "none";
-                    window.getSelection().removeAllRanges(); // حذف انتخاب
-
-                    // // نمایش دکمه ذخیره پس از اولین ویرایش
-                    // if (!isEdited) {
-                    //     document.getElementById("send-button").style.display = "block";
-
-                    //     isEdited = true; // تنظیم وضعیت ویرایش
-                    // }
+                    window.getSelection().removeAllRanges(); 
 
                     if (newText.trim() !== selectedText.trim()) {
                         setTimeout(() => {
-                            showNotification("Saved Successfully!");
-                        }, 2000);
+                            contentHasChanges = true;
+                            startAutosaveTimer();
+                        }, 100);
                     }
                 }
             });
 
-            // تایید ویرایش متن با کلیک بر روی Enter
+            // press Enter key
             editText.addEventListener("keydown", (e) => {
                 if (e.key === "Enter") {
                     if (e.shiftKey) {
-                        // ایجاد خط جدید در صورت فشردن Shift + Enter
+                        // insert newline when Shift + Enter pressed
                         e.stopPropagation();
                     } else {
-                        e.preventDefault();  // جلوگیری از ایجاد خط جدید
+                        e.preventDefault();
                         const newText = editText.value.trimEnd() + " ";
                         if (range) {
                             range.deleteContents();
                             range.insertNode(document.createTextNode(newText));
                             popup.style.display = "none";
-                            window.getSelection().removeAllRanges(); // حذف انتخاب
-
-                            // نمایش دکمه ذخیره پس از اولین ویرایش
-                            // if (!isEdited) {
-                            //     //document.getElementById("send-button").style.display = "block";
-                            //     setTimeout(() => {
-                            //         showNotification("متن با موفقیت ذخیره شد");
-                            //     }, 3000);
-                            //     isEdited = true; // تنظیم وضعیت ویرایش
-                            // }
+                            window.getSelection().removeAllRanges();
 
                             if (newText.trim() !== selectedText.trim()) {
                                 setTimeout(() => {
-                                    showNotification("Saved Successfully!");
-                                }, 2000);
+                                    contentHasChanges = true;
+                                    startAutosaveTimer();
+                                }, 100);
                             }
                         }
                     }
                 }
             });
 
-            // حذف متن انتخاب‌شده
+            // to delete seleted text from the context
             deleteWord.addEventListener("click", () => {
                 if (range) {
                     range.deleteContents();
                     popup.style.display = "none";
-                    window.getSelection().removeAllRanges(); // حذف انتخاب
-
-                    // نمایش دکمه ارسال پس از اولین ویرایش
-                    // if (!isEdited) {
-                    //     document.getElementById("send-button").style.display = "block";
-                    //     isEdited = true; // تنظیم وضعیت ویرایش
-                    // }
+                    window.getSelection().removeAllRanges();
 
                     if (newText.trim() !== selectedText.trim()) {
                         setTimeout(() => {
-                            showNotification("Saved Successfully!");
-                        }, 2000);
+                            contentHasChanges = true;
+                            startAutosaveTimer();
+                        }, 100);
                     }
                 }
             });
 
-            // بستن پاپ‌آپ با کلیک خارج از آن
+            // close popup then clicking somewhere outsite of the popup window
             document.addEventListener("click", (e) => {
                 if (!popup.contains(e.target) && !resultText.contains(e.target)) {
                     popup.style.display = "none";
@@ -344,11 +323,6 @@
             });
         });
 
-        // افزودن عملکرد ارسال متن به سمت سرور
-        document.getElementById("send-button").addEventListener("click", () => {
-            const editedText = editText.value;
-            console.log(editedText);
-        });
 
         function showNotification(message) {
             const notification = document.createElement('div');
@@ -357,11 +331,46 @@
 
             document.getElementById('notifications').appendChild(notification);
 
-            // حذف پیام پس از 5 ثانیه
+            // hide notification after 6 seconds
             setTimeout(() => {
                 notification.classList.add('hide');
                 setTimeout(() => notification.remove(), 500); // حذف از DOM پس از محو شدن
-            }, 5000);
+            }, 6000);
+        }
+
+
+        async function sendChangesToAPI() {
+            const data = { content: resultText.value };
+            try {
+                const response = await fetch('/autosave', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    console.dir(response);
+                    showNotification("Saved Successfully!");
+                    contentHasChanges = false; // تغییرات ارسال شد
+                } else {
+                    showNotification("Error saving changes!");
+                }
+            } catch (error) {
+                showNotification("Error saving changes! error=" + error);
+            }
+        }
+
+        // تابع برای شروع شمارش 20 ثانیه‌ای
+        function startAutosaveTimer() {
+            if (!autosaveTimer) {
+                autosaveTimer = setInterval(() => {
+                    if (contentHasChanges) {
+                        await sendChangesToAPI();
+                    }
+                }, 20000);
+            }
         }
     </script>
 </body>

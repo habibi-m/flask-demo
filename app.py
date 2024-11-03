@@ -66,6 +66,18 @@ def index():
 
     return render_template('index.html', transcriptions=formatted_transcriptions)
 
+# Route for autosaving
+@app.route('/autosave', methods=['POST'])
+def autosave():
+    data = request.get_json()
+    content = data.get('content')
+    
+    if not content:
+        return jsonify({"error": "Content is required"}), 400
+    
+    print('content: ', content)
+    return jsonify({"message": "Content saved successfully"}), 200
+
 # Route for handling file upload
 @app.route('/upload', methods=['POST'])
 def upload_file():
