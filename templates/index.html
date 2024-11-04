@@ -289,7 +289,7 @@
                             window.getSelection().removeAllRanges();
 
                             if (newText.trim() !== selectedText.trim()) {
-                                setTimeout(() => {
+                                setTimeout(async () => {
                                     contentHasChanges = true;
                                     startAutosaveTimer();
                                 }, 100);
@@ -365,8 +365,8 @@
         // تابع برای شروع شمارش 20 ثانیه‌ای
         function startAutosaveTimer() {
             if (!autosaveTimer) {
-                autosaveTimer = setInterval(() => {
-                    if (contentHasChanges) {
+                autosaveTimer = setInterval(async () => {
+                    if (contentHas1Changes) {
                         await sendChangesToAPI();
                     }
                 }, 20000);
