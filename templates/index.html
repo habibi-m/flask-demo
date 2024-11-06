@@ -16,11 +16,10 @@
         <div class="sidebar">
             <h2>History</h2>
             <ul id="history-list">
-                {% for transcription in transcriptions %}
-                <li
-                    onclick="showTranscription('{{ transcription['transcription'].replace("'", "\\'").replace('\n', '\\n') }}')">
-                    <em>{{ transcription['filename'] }}<em> [{{ transcription['size'] }}]</em></em>
-                    <span>{{ transcription['request_at'] }}</span>
+                {% for item in transcriptions %}
+                <li onclick="showTranscription('{{ item['id'] }}')">
+                    <em>{{ item['filename'] }}<em> [{{ item['size'] }}]</em></em>
+                    <span>{{ item['request_at'] }}</span>
                 </li>
                 {% endfor %}
             </ul>
@@ -72,6 +71,8 @@
 
     <script>
 
+        const transcriptions = {{ transcriptions | tojson }};
+
         let waveform = WaveSurfer.create({
             container: '#waveform',
             waveColor: '#ddd',
@@ -81,10 +82,12 @@
             responsive: true
         });
 
+        let currTranscription;
+
         let transcribedLines = [];
 
         document.getElementById('upload-form').addEventListener('submit', function (event) {
-            event.preventDefault();  // Prevent form from submitting traditionally
+            event.preventDefault();
 
             const fileInput = document.getElementById('audio-file');
             const formData = new FormData();
@@ -105,26 +108,19 @@
                     document.getElementById('loading-spinner').style.display = 'none';
 
                     if (data.transcription) {
-                        //document.getElementById('result-text').innerHTML = '<div id="send-button" class="send-btn" style="display: none;">save</div>' + parseApiText(data.transcription);
+                        transcriptions.push(data);
+                        currTranscription = data;
                         document.getElementById('result-text').innerHTML = parseApiText(data.transcription);
 
                         // Dynamically add new item to the history list with formatted file size
                         const historyList = document.getElementById('history-list');
                         const newItem = document.createElement('li');
-
-                        // Set the inner HTML of the new item
                         newItem.innerHTML = `
-                        <em>${data.filename}<em> [${formatFileSize(data.size)}]</em></em>
-                        <span>${data.request_at}</span>
-                    `;
-
-                        // Set onclick event to show transcription
-                        //newItem.setAttribute('onclick', `showTranscription('${data.transcription}')`);
-                        newItem.setAttribute('onclick', `showTranscription('${data.transcription.replace(/'/g, "\\'").replace(/\n/g, '\\n')}')`);
-
-                        // Add the new item to the history list
+                            <em>${data.filename}<em> [${formatFileSize(data.size)}]</em></em>
+                            <span>${data.request_at}</span>
+                        `;
+                        newItem.setAttribute('onclick', `showTranscription('${data.id}')`);
                         historyList.appendChild(newItem);
-
 
                         transcribedLines = extractTimingData(data.transcription);
                         displayAudioPlayer(fileInput.files[0]);
@@ -138,9 +134,11 @@
                 });
         });
 
-        function showTranscription(text) {
-            //document.getElementById('result-text').innerHTML = '<div id="send-button" class="send-btn" style="display: none;">save</div>' + parseApiText(text);
-            document.getElementById('result-text').innerHTML = parseApiText(text);
+        function showTranscription(t_id) {
+            currTranscription = transcriptions.find(item => item.id == t_id);
+            //document.getElementById('result-text').innerHTML = parseApiText(currTranscription.transcription.replace(/'/g, "\\'").replace(/\n/g, '\\n'));
+            document.getElementById('result-text').innerHTML = parseApiText(currTranscription.transcription);
+            //displayAudioPlayer(null, currTranscription.filename)
         }
 
         function extractTimingData(apiText) {
@@ -156,20 +154,19 @@
             }).filter(Boolean);
         }
 
-        function parseApiText(apiText) {
-            return apiText.split('\n').map(line => {
-                const textOnly = line.replace(/\[\d+\.\d+s -> \d+\.\d+s\]\s*/, ''); // remove timestamps
-                return `<span>${textOnly}</span><br>`;
+        function parseApiText(text) {
+            return text.split('\n').map(line => {
+                //const textOnly = line.replace(/\[\d+\.\d+s -> \d+\.\d+s\]\s*/, ''); // remove timestamps
+                // return `<span>${textOnly}</span><br>`;
+                return `<span>${line}</span><br>`;
             }).join('');
         }
 
-        function displayAudioPlayer(audioFile) {
-            // نابود کردن waveform قبلی
+        function displayAudioPlayer(audioFile, filename = '') {
             if (waveform) {
                 waveform.destroy();
             }
 
-            // بازسازی waveform جدید
             waveform = WaveSurfer.create({
                 container: '#waveform',
                 waveColor: '#ddd',
@@ -179,13 +176,19 @@
                 responsive: true
             });
 
-            const audioUrl = URL.createObjectURL(audioFile);
+            let audioUrl = '';
+            if(audioFile) {
+                audioUrl = URL.createObjectURL(audioFile);
+            }
+            else {
+                audioUrl =  `/audio/${filename}`;
+            }
+            
             waveform.load(audioUrl);
 
             // تنظیم رویداد play/pause برای دکمه
             document.getElementById('playPauseBtn').onclick = () => {
                 const selectedSpeed = parseFloat(document.getElementById('playback-speed').value);
-                console.log('selectedSpeed: ' + selectedSpeed);
                 waveform.setPlaybackRate(selectedSpeed);
 
                 waveform.playPause();
@@ -325,7 +328,7 @@
 
             async function sendChangesToAPI() {
                 const textToSend = document.getElementById("result-text").innerText;
-                const data = { content: textToSend };
+                const data = { id: currTranscription.id, content: textToSend };
                 try {
                     const response = await fetch('/autosave', {
                         method: 'POST',
@@ -336,11 +339,16 @@
                     });
 
                     if (response.ok) {
-                        console.dir(response);
-                        showNotification("Saved Successfully!");
-                        contentHasChanges = false; // تغییرات ارسال شد
+                        const successData = await response.json();
+                        showNotification(`${successData.message}`, "success");
+                        contentHasChanges = false;
+                        
+                        //update transactions
+                        transcriptions.find(item => item.id == currTranscription.id).transcription = textToSend;
+
                     } else {
-                        showNotification("Error saving changes!", "error");
+                        const errorData = await response.json();
+                        showNotification(`Error saving changes: ${errorData.error}`, "error");
                     }
                 } catch (err) {
                     showNotification("Error saving changes! error=" + err, "error");

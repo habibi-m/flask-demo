@@ -9,5 +9,5 @@ function showNotification(message,  type = 'success') {
     setTimeout(() => {
         notification.classList.add('hide');
         setTimeout(() => notification.remove(), 500); // حذف از DOM پس از محو شدن
-    }, 6000);
+    }, 7000);
 }
