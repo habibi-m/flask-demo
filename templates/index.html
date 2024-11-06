@@ -7,6 +7,7 @@
     <title>Speech to Text - Demo</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="{{ url_for('static', filename='js/wavesurfer-7.8.8.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </head>
 
 <body>
@@ -262,7 +263,7 @@
                     range.deleteContents();
                     range.insertNode(document.createTextNode(newText));
                     popup.style.display = "none";
-                    window.getSelection().removeAllRanges(); 
+                    window.getSelection().removeAllRanges();
 
                     if (newText.trim() !== selectedText.trim()) {
                         setTimeout(() => {
@@ -321,57 +322,41 @@
                     popup.style.display = "none";
                 }
             });
-        });
 
+            async function sendChangesToAPI() {
+                const textToSend = document.getElementById("result-text").innerText;
+                const data = { content: textToSend };
+                try {
+                    const response = await fetch('/autosave', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    });
 
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.classList.add('notification');
-            notification.textContent = message;
-
-            document.getElementById('notifications').appendChild(notification);
-
-            // hide notification after 6 seconds
-            setTimeout(() => {
-                notification.classList.add('hide');
-                setTimeout(() => notification.remove(), 500); // حذف از DOM پس از محو شدن
-            }, 6000);
-        }
-
-
-        async function sendChangesToAPI() {
-            const data = { content: resultText.value };
-            try {
-                const response = await fetch('/autosave', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                if (response.ok) {
-                    console.dir(response);
-                    showNotification("Saved Successfully!");
-                    contentHasChanges = false; // تغییرات ارسال شد
-                } else {
-                    showNotification("Error saving changes!");
-                }
-            } catch (error) {
-                showNotification("Error saving changes! error=" + error);
-            }
-        }
-
-        // تابع برای شروع شمارش 20 ثانیه‌ای
-        function startAutosaveTimer() {
-            if (!autosaveTimer) {
-                autosaveTimer = setInterval(async () => {
-                    if (contentHas1Changes) {
-                        await sendChangesToAPI();
+                    if (response.ok) {
+                        console.dir(response);
+                        showNotification("Saved Successfully!");
+                        contentHasChanges = false; // تغییرات ارسال شد
+                    } else {
+                        showNotification("Error saving changes!", "error");
                     }
-                }, 20000);
+                } catch (err) {
+                    showNotification("Error saving changes! error=" + err, "error");
+                }
             }
-        }
+
+            function startAutosaveTimer() {
+                if (!autosaveTimer) {
+                    autosaveTimer = setInterval(async () => {
+                        if (contentHasChanges) {
+                            await sendChangesToAPI();
+                        }
+                    }, 10000);
+                }
+            }
+        });
     </script>
 </body>
 

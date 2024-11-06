@@ -1,10 +1,12 @@
 import sqlite3
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import os
 import time  # To simulate a long-running process
 import math
 
 app = Flask(__name__)
+CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
 # Initialize the SQLite database
@@ -69,7 +71,9 @@ def index():
 # Route for autosaving
 @app.route('/autosave', methods=['POST'])
 def autosave():
+    print('autosave is called!')
     data = request.get_json()
+    print(data)
     content = data.get('content')
     
     if not content:

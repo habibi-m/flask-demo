@@ -266,6 +266,14 @@ ul#history-list li span {
     transition: opacity 0.5s ease;
 }
 
+.notification.success {
+    background-color: #4CAF50;
+}
+
+.notification.error {
+    background-color: #f44336;
+}
+
 .notification.hide {
     opacity: 0;
 }
